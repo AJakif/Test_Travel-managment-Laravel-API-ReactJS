@@ -17,7 +17,7 @@ class ExtracostController extends Controller
     {
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
         $data['alldata'] = ExtraCost::orderBy('id','desc')->get();
-        return view('account.dashboard.extracost.index',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -28,7 +28,7 @@ class ExtracostController extends Controller
     public function create()
     {
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
-        return view('account.dashboard.extracost.add',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -51,7 +51,8 @@ class ExtracostController extends Controller
         $cost->description = $request->description;
         $cost->save();
 
-        return redirect()->route('account.extracost')->with('success','Extra Cost Added Succecfully');
+        $message = "Extra cost added";
+        return response()->json([$message,$cost],200);
     }
 
     /**
@@ -75,7 +76,7 @@ class ExtracostController extends Controller
     {
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
         $data['editdata'] = ExtraCost::find($id);
-        return view('account.dashboard.extracost.edit',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -99,7 +100,8 @@ class ExtracostController extends Controller
         $cost->description = $request->description;
         $cost->save();
 
-        return redirect()->route('account.extracost')->with('success','Extra Cost Updated Succecfully');
+        $message = "Extra cost Updated";
+        return response()->json([$message,$cost],200);
     }
 
     /**

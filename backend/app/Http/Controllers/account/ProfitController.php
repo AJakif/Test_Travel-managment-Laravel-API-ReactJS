@@ -15,7 +15,7 @@ class ProfitController extends Controller
 {
     public function show(){
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
-        return view('account.dashboard.profit.show',$data);
+        return response()->json([$data],200);
     }
 
 
@@ -35,7 +35,8 @@ class ProfitController extends Controller
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
 
         //dd('ok');
-        return view('account.dashboard.profit.show',$data)->with('package_sell',$package_sell)->with('profit',$profit)
+        return view('account.dashboard.profit.show',$data)
+        ->with('package_sell',$package_sell)->with('profit',$profit)
         ->with('extra_cost',$extra_cost)->with('emp_salary',$emp_salary)->with('total_cost',$total_cost)
         ->with('start_date',$start_date)
         ->with('end_date',$end_date)

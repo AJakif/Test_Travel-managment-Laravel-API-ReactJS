@@ -12,7 +12,7 @@ class OrderController extends Controller
     {
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
         $data['alldata'] = Order::orderBy('id','desc')->get();
-        return view('account.dashboard.order.index',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -23,7 +23,7 @@ class OrderController extends Controller
     public function create()
     {
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
-        return view('account.dashboard.order.add',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -39,7 +39,8 @@ class OrderController extends Controller
         $order->amount = $request->amount;
         $order->save();
 
-        return redirect()->route('account.order')->with('success','Order Added Succecfully');
+        $message = "Order added";
+        return response()->json([$message,$order],200);
     }
 
     /**
@@ -63,7 +64,7 @@ class OrderController extends Controller
     {
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
         $data['editdata'] = Order::find($id);
-        return view('account.dashboard.order.edit',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -81,7 +82,8 @@ class OrderController extends Controller
         
         $cost->save();
 
-        return redirect()->route('account.order')->with('success','Order Updated Succecfully');
+        $message = "order cost updated";
+        return response()->json([$message,$cost],200);
     }
     public function destroy($id)
     {

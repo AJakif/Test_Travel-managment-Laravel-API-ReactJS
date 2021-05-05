@@ -19,7 +19,7 @@ class EmpController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['alldata'] = User::where('type','=' ,'employee')->orwhere('type','=' ,'guide')->get();
-        return view('account.dashboard.employee.index',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -31,7 +31,7 @@ class EmpController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         
-        return view('account.dashboard.employee.create',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -73,7 +73,8 @@ class EmpController extends Controller
                 $employee_salary->increment_salary = '0';
                 $employee_salary->save();
 
-            return redirect()->route('account.employee')->with('success','Employee regestered Succesfully');
+                $message = "Employee regestered succesfully";
+                return response()->json(['User'=>$user,'salary'=>$employee_salary,$message],200);
 
     }
 
@@ -98,7 +99,7 @@ class EmpController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
        $data['user'] = User::find($id);
-       return view('account.dashboard.employee.edit',$data);
+       return response()->json([$data],200);
     }
 
     /**
@@ -130,7 +131,8 @@ class EmpController extends Controller
         $user->save();
 
 
-        return redirect()->route('account.employee')->with('success','Employee Information Updated Succesfully');
+        $message = "Employee Information Updated succesfully";
+                return response()->json(['User'=>$user,$message],200);
     }
 
     /**
@@ -145,15 +147,18 @@ class EmpController extends Controller
         if($user){
             $status=$user->delete();
             if($status){
-                return redirect()->route('account.employee')->with('success','User successfully deleted');
+                $message = "Employee Deleted succesfully";
+                return response()->json([$status,$message],200);
             }
             else{
-                return redirect()->route('account.employee')->with('error','Error, Please try again');
+                $message = "Error please try again";
+                return response()->json([$status,$message],200);
             }
             
         }
         else{
-            return redirect()->back()->with('error','User not found');
+            $message = "Employee not found";
+                return response()->json([$message],200);
         }
     }
 }

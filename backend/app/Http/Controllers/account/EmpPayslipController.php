@@ -13,7 +13,7 @@ class EmpPayslipController extends Controller
 {
     public function index(){
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
-        return view('account.dashboard.payroll.index',$data);
+        return response()->json([$data],200);
     }
     public function getSalary(Request $request){
         //dd('ok');
@@ -27,9 +27,7 @@ class EmpPayslipController extends Controller
             $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
             $edata = Employeeattendance::select('employee_id')->groupBy('employee_id')->where($where)->get();
                    
-            return view('account.dashboard.payroll.index',$data)->with('editdata',$edata)
-            ->with('where',$where)
-            ->with('date',$date);
+            return response()->json(['editdata'=>$edata,'where'=>$where,'date'=>$date,$data]);
             
             
                 

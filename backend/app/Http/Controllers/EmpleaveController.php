@@ -18,7 +18,7 @@ class EmpleaveController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['alldata'] = EmployeeLeave::orderBy('id','desc')->get();
-        return view('account.dashboard.employeeLeave.index',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -31,7 +31,7 @@ class EmpleaveController extends Controller
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['employees'] = User::where('type','=' ,'employee')->orwhere('type','=' ,'guide')->get();
         $data['leave_purpose'] = LeavePurpose::all();
-        return view('account.dashboard.employeeLeave.create',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -60,7 +60,8 @@ class EmpleaveController extends Controller
                 $employee_leave ->status = "accepted";
                 $employee_leave -> save();
 
-            return redirect()->route('account.employee.leave')->with('success','Employee Leave Submitted Succesfully');
+                $message = "employee leave stored succesfully";
+            return response()->json([$leavepurpose,$employee_leave,$message],200);
 
     }
 
@@ -87,7 +88,7 @@ class EmpleaveController extends Controller
         $data['editdata']=EmployeeLeave::find($id);
         $data['employees'] = User::where('type','=' ,'employee')->orwhere('type','=' ,'guide')->get();
         $data['leave_purpose'] = LeavePurpose::all();
-       return view('account.dashboard.employeeLeave.edit',$data);
+       return response()->json([$data],200);
     }
 
     /**
@@ -116,8 +117,8 @@ class EmpleaveController extends Controller
             $employee_leave ->leave_purpose_id = $leave_purpose_id;
             $employee_leave -> save();
 
-        return redirect()->route('account.employee.leave')->with('success','Employee Leave Updated Succesfully');
-
+            $message = "employee leave Updated succesfully";
+            return response()->json([$leavepurpose,$employee_leave,$message],200);
     }
 
     /**

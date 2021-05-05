@@ -18,7 +18,7 @@ class SalaryController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['alldata'] = EmployeeSalary::all();
-        return view('account.dashboard.salarylog.index',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -29,7 +29,7 @@ class SalaryController extends Controller
     public function pay()
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
-        return view('account.dashboard.salarylog.pay',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -48,9 +48,7 @@ class SalaryController extends Controller
             $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
             $edata = Employeeattendance::select('employee_id')->groupBy('employee_id')->where($where)->get();
                    
-            return view('account.dashboard.salarylog.pay',$data)->with('editdata',$edata)
-            ->with('where',$where)
-            ->with('date',$date);
+            return response()->json([$data,'editdata'=>$edata,'where'=>$where,'date'=>$date],200);
     }
 
    
@@ -73,9 +71,11 @@ class SalaryController extends Controller
             }
         }
         if(!empty($data) || empty($checkdata)){
-            return redirect()->route('account.employee.salary.view')->with('success','Salary Successfully Paid');
+            $message = "Salary Succesfully paid";
+            return response()->json([$message,$data,$checkdata],200);
         }else{
-            return redirect()->back()->with('error','Sorry! Salary Not Paid, Please Try Again');
+            $message = "Error please try again";
+            return response()->json([$message],200);
         }
     }
 

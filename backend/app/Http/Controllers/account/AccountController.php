@@ -26,23 +26,21 @@ class AccountController extends Controller
         $emp_salary =EmployeeSalary::whereBetween('date',[$start_date, $end_date])->sum('amount');
         $total_cost = $extra_cost + $emp_salary;
         $profit = $package_sell-$total_cost;
-        //$m_prof_rate= 
-   
-        return view('account.dashboard.index', $data,$count);
+        //$m_prof_rate=
+        return response()->json(['data'=> $data,'count'=>$count],200);
     }
 
     public function ulist(){
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $userlist = DB::select('select * from users');
-        return view('account.dashboard.user.Totaluser', $data)->with('userlist',$userlist);
+        return response()->json(['data'=>$data,'userlist'=>$userlist]);
     }
 
 
     public function edit( $id ,Request $req)
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', $id)->first()];
-
-       return view('account.dashboard.profile.editprofile',$data);
+       return response()->json([$data]);
     }
     
     /**
@@ -71,14 +69,15 @@ class AccountController extends Controller
                     $user->save();
                    
                 } else {
-                 
-                    return redirect(route('account.profile'))->with('fail','Profile Information Update Succesfull');
+                $message = "Profile Information Updated Succesfully";
+                return response()->json([$message],200);
                 }
 
                
             }    
             $user->save();
-    return redirect(route('account.profile'))->with('success','Profile Information Update Succesfull');
+            $message = "Profile information updated succesfully";
+            return response()->json([$message,'user'=>$user],200);
     
    
       
@@ -98,7 +97,6 @@ class AccountController extends Controller
     }
     public function profile(Request $req){
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
-        
-        return view('account.dashboard.profile.profile',$data);
+        return response()->json([$data],200);
     }
 }

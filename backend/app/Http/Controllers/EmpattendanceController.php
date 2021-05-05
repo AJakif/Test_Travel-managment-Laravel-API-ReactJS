@@ -19,7 +19,7 @@ class EmpattendanceController extends Controller
         
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['alldata'] = Employeeattendance::select('date')->groupBy('date')->orderBy('id','DESC')->get();
-        return view('account.dashboard.empattendance.index',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -32,7 +32,7 @@ class EmpattendanceController extends Controller
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['employees'] = User::where('type','=' ,'employee')->orwhere('type','=' ,'guide')->get();
         $data['leavepurpose']=LeavePurpose::all();
-        return view('account.dashboard.empattendance.add',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -53,7 +53,8 @@ class EmpattendanceController extends Controller
            $attend->attend_status = $request->$attend_status;
            $attend -> save();
        }
-       return redirect()->route('account.employee.attendance')->with('success','Attendance Given Succesfully');
+       $message = "employee attendance given succesfully";
+            return response()->json([$attend,$message],200);
     }
 
     /**
@@ -78,7 +79,7 @@ class EmpattendanceController extends Controller
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['employees'] = User::where('type','=' ,'employee')->orwhere('type','=' ,'guide')->get();
         $data['editdata'] = Employeeattendance::where('date',$date)->get();
-        return view('account.dashboard.empattendance.edit',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -100,7 +101,8 @@ class EmpattendanceController extends Controller
             $attend->attend_status = $request->$attend_status;
             $attend -> save();
         }
-        return redirect()->route('account.employee.attendance')->with('success','Attendance Given Succesfully');
+        $message = "employee attendance Updated succesfully";
+            return response()->json([$attend,$message],200);
     }
 
     /**
@@ -113,6 +115,6 @@ class EmpattendanceController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['alldata'] = Employeeattendance::where('date',$date)->get();
-        return view('account.dashboard.empattendance.view',$data);
+        return response()->json([$data],200);
     }
 }

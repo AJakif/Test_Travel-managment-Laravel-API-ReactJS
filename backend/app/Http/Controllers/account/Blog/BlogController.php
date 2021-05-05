@@ -16,8 +16,7 @@ class BlogController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $blogs=Blog::getAllBlog();
-        // return $blogs;
-        return view('account.dashboard.blog.index',$data)->with('blogs',$blogs);
+        return response()->json([$data,'blogs'=>$blogs],200);
     }
 
     /**
@@ -31,7 +30,7 @@ class BlogController extends Controller
         $categories=BlogCategory::get();
         $tags=BlogTag::get();
         $users=User::get();
-        return view('account.dashboard.blog.create',$data)->with('users',$users)->with('categories',$categories)->with('tags',$tags);
+        return response()->json([$data,'blogcatagory'=>$categories,'blogtags'=>$tags,'users'=>$users],200);
     }
 
     /**
@@ -88,12 +87,13 @@ class BlogController extends Controller
 
         $status=$blog->fill($data)->save();
         if($status){
-            request()->session()->flash('success','Blog Successfully added');
+            $message = "Blog Succesfully Added";
+            return response()->json([$status,$message],200);
         }
         else{
-            request()->session()->flash('error','Please try again!!');
+            $message = "Error please try again";
+            return response()->json([$status,$message],200);
         }
-        return redirect()->route('blog.index');
     }
 
     /**
@@ -120,7 +120,7 @@ class BlogController extends Controller
         $categories=BlogCategory::get();
         $tags=BlogTag::get();
         $users=User::get();
-        return view('account.dashboard.blog.edit',$data)->with('categories',$categories)->with('users',$users)->with('tags',$tags)->with('blog',$blog);
+        return response()->json([$data,'blog'=>$blog,'blogcatagory'=>$categories,'blogtags'=>$tags,'users'=>$users],200);
     }
 
     /**
@@ -171,12 +171,13 @@ class BlogController extends Controller
 
         $status=$blog->fill($data)->save();
         if($status){
-            request()->session()->flash('success','Blog Successfully updated');
+            $message = "Blog Succesfully Updated";
+            return response()->json([$status,$message],200);
         }
         else{
-            request()->session()->flash('error','Please try again!!');
+            $message = "Error PLease try again";
+            return response()->json([$status,$message],200);
         }
-        return redirect()->route('blog.index');
     }
 
     /**
@@ -192,11 +193,12 @@ class BlogController extends Controller
         $status=$blog->delete();
         
         if($status){
-            request()->session()->flash('success','Blog successfully deleted');
+            $message = "Blog Succesfully Deleted";
+            return response()->json([$status,$message],200);
         }
         else{
-            request()->session()->flash('error','Error while deleting Blog ');
+            $message = "Error please try again";
+            return response()->json([$status,$message],200);
         }
-        return redirect()->route('blog.index');
     }
 }

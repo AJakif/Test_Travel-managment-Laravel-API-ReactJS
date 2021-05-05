@@ -19,7 +19,7 @@ class EmpSalaryController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['alldata'] = User::where('type','=' ,'employee')->orwhere('type','=' ,'guide')->get();
-        return view('account.dashboard.employeesalary.index',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -34,7 +34,7 @@ class EmpSalaryController extends Controller
         $data['details'] = User::find($id);
         $data['SalaryLog']=EmployeeSalaryLog::where('employee_id',$data['details']->id)->get();
         //dd($data['SalaryLog']->toArray());
-        return view('account.dashboard.employeesalary.details',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -47,7 +47,7 @@ class EmpSalaryController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['user'] = User::find($id);
-        return view('account.dashboard.employeesalary.increment',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -73,7 +73,8 @@ class EmpSalaryController extends Controller
         $salaryData->effected_date =date('Y-m-d',strtotime($request->effected_date)) ;
         $salaryData->save();
 
-        return redirect()->route('account.employee.salary.index')->with('success','Salary Incremented Succesfully');
+        $message = "Employee salary Updated succesfully";
+        return response()->json([$salaryData,$user,$message],200);
 
     }
 

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Facades\Hash;
-
+use Symfony\Component\HttpFoundation\Response;
 
 class LoginController extends Controller
 {
@@ -38,40 +38,15 @@ class LoginController extends Controller
          //check password
          if(Hash::check($request->password, $userInfo->password))
          {
-            //if($userInfo->type == 'user'){
-            //    $request->session()->put('Loggedtype', $userInfo->type);
-            //     $request->session()->put('LoggedUser', $userInfo->id);
-            //     return redirect('/customer/dashboard');
-            // }
-            // elseif($userInfo->type == 'admin'){
-            //    $request->session()->put('Loggedtype', $userInfo->type);
-            //     $request->session()->put('LoggedUser', $userInfo->id);
-                 
-            //     return redirect('/admin/dashboard');
-            // }
-            // elseif($userInfo->type == 'account'){
-            //    $request->session()->put('Loggedtype', $userInfo->type);
-            //     $request->session()->put('LoggedUser', $userInfo->id);
-            //     return redirect('/');
-            // }
-            // elseif($userInfo->type == 'employee'){
-            //    $request->session()->put('Loggedtype', $userInfo->type);
-            //     $request->session()->put('LoggedUser', $userInfo->id);
-            //     return redirect('/employee/dashboard');
-            // }
-            // elseif($userInfo->type == 'guide'){
-            //    $request->session()->put('Loggedtype', $userInfo->type);
-            //    $request->session()->put('LoggedUser', $userInfo->id);
-            //    return redirect('/guide/dashboard');
-            //}
-
-            $request->session()->put('Loggedtype', $userInfo->type);
-            $request->session()->put('LoggedUser', $userInfo->id);
-            return redirect('/');
+            $data['type'] = $userInfo->type;
+            $data['id'] = $userInfo->id;
+            $message = "Logged in succesfull";
+            return response()->json([$data,$message],200);
 
          }
          else{
-             return back()->with('fail','Incorrect password');
+             $message = "Incorrect Password";
+             return response()->json([$message],200);
          }
      }
    

@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
                 'email'=>'employee@employee.com',
                 'type'=>'employee',
                 'bloodgroup'=>'O+',
-                'gender'=>'female',
+                'gender'=>'male',
                 'salary'=>'30000',
                 'join_date'=>'2021-04-03 00:00:00'
             ),

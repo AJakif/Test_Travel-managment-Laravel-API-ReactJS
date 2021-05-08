@@ -19,7 +19,7 @@ class CouponController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $coupon=Coupon::orderBy('id','DESC')->paginate('10');
-        return response()->json(['data'=>$data,'coupon'=>$coupon],200);
+        return view('account.dashboard.coupon.index',$data)->with('coupons',$coupon);
     }
 
     /**
@@ -30,7 +30,7 @@ class CouponController extends Controller
     public function create()
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
-        return response()->json([$data],200);
+        return view('account.dashboard.coupon.create',$data);
     }
 
     /**
@@ -50,13 +50,12 @@ class CouponController extends Controller
         $data=$request->all();
         $status=Coupon::create($data);
         if($status){
-            $message = "Coupon Succesfully added";
-            return response()->json([$message,'status'=>$status],200);
+            request()->session()->flash('success','Coupon Successfully added');
         }
         else{
-            $message = "Error try again";
-            return response()->json([$message,'status'=>$status],200);
+            request()->session()->flash('error','Please try again!!');
         }
+        return redirect()->route('coupon.index');
     }
 
     /**
@@ -81,11 +80,10 @@ class CouponController extends Controller
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $coupon=Coupon::find($id);
         if($coupon){
-            return response()->json([$data,'coupon'=>$coupon],200);
+            return view('account.dashboard.coupon.edit',$data)->with('coupon',$coupon);
         }
         else{
-            $message = "Coupon not found";
-            return response()->json([$data,$message],200);
+            return view('account.dashboard.coupon.index',$data)->with('error','Coupon not found');
         }
     }
 
@@ -109,13 +107,12 @@ class CouponController extends Controller
         
         $status=$coupon->fill($data)->save();
         if($status){
-            $message = "Coupon Succesfully Updated";
-            return response()->json([$status,$message],200);
+            request()->session()->flash('success','Coupon Successfully updated');
         }
         else{
-            $message = "Coupon not found";
-            return response()->json([$status,$message],200);
+            request()->session()->flash('error','Please try again!!');
         }
+        return redirect()->route('coupon.index');
     }
 
     /**
@@ -130,17 +127,16 @@ class CouponController extends Controller
         if($coupon){
             $status=$coupon->delete();
             if($status){
-                $message = "Coupon Succesfully Deleted";
-            return response()->json([$status,$message],200);
+                request()->session()->flash('success','Coupon successfully deleted');
             }
             else{
-                $message = "Error, please try again";
-            return response()->json([$status,$message],200);
+                request()->session()->flash('error','Error, Please try again');
             }
+            return redirect()->route('coupon.index');
         }
         else{
-            $message = "Coupon not found";
-            return response()->json([$message],200);
+            request()->session()->flash('error','Coupon not found');
+            return redirect()->back();
         }
     }
 
@@ -149,8 +145,8 @@ class CouponController extends Controller
         $coupon=Coupon::where('code',$request->code)->first();
         // dd($coupon);
         if(!$coupon){
-            $message = "Invald Coupon Code";
-            return response()->json([$message],200);
+            request()->session()->flash('error','Invalid coupon code, Please try again');
+            return back();
         }
         if($coupon){
             $total_price=Cart::where('user_id',user::where('id','=', session('LoggedUser')))->where('order_id',null)->sum('price');
@@ -160,8 +156,8 @@ class CouponController extends Controller
                 'code'=>$coupon->code,
                 'value'=>$coupon->discount($total_price)
             ]);
-            $message = "Coupon Succesfully applied";
-            return response()->json([$message],200);
+            request()->session()->flash('success','Coupon successfully applied');
+            return redirect()->back();
         }
     }
 }

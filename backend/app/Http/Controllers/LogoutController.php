@@ -10,7 +10,7 @@ class LogoutController extends Controller
     {
         if(session()->has('LoggedUser')){
             session()->pull('LoggedUser');
-            return redirect('/');
+            return redirect('/')->with("success",'Logout succeessfully');
         }
     }
 }

@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\employee;
 use App\Models\User;
+use App\Models\Customer;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\EmployeeRequest;
 
 class EmployeeController extends Controller
 {
@@ -54,10 +56,36 @@ class EmployeeController extends Controller
     }
     public function dashboard(Request $req)
     {
+        $users = Customer::select(DB::raw("COUNT(*) as count"))
+                ->whereYear('created_at',date('Y'))
+                ->groupBy(DB::raw("Month(created_at)"))
+                ->pluck('count');
 
-      /*   $count  =DB::table('customers')->count(); */
-       /*  $employee = User::where('username',$req->session()->get('username'))->first(); */
-        return view('employee.dashboard.index');/* ->with('employee',$employee); */
+
+        $months = Customer::select(DB::raw("Month(created_at) as month"))
+                ->whereYear('created_at',date('Y'))
+                ->groupBy(DB::raw("Month(created_at)"))
+                ->pluck('month');
+
+        $datas = array(0,0,0,0,0,0,0,0,0,0,0,);
+
+        foreach($months as $index => $month)
+        {
+            $datas[$month] = $users[$index];
+
+        }
+
+
+      
+       
+      $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
+      $count = DB::select('select count(*) as total from users');
+      $package = DB::table('packages')->count();
+      $booking = DB::table('bookings')->count();
+      $tourguide = DB::table('tourguides')->count();
+
+      $feedback = DB::table('feedbacks')->count();
+        return view('employee.dashboard.index',$data,compact('datas','package','booking','tourguide','feedback'),$count);
     }
     /**
      * Show the form for editing the specified resource.
@@ -67,8 +95,8 @@ class EmployeeController extends Controller
      */
     public function edit( $id ,Request $req)
     {
-       $employee = User::find($id);
-       return view('employee.dashboard.profile.editprofile')->with('employee', $employee);
+        $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
+       return view('employee.dashboard.profile.editprofile', $data);
     }
     
     /**
@@ -78,34 +106,37 @@ class EmployeeController extends Controller
      * @param  \App\Models\Employee  $employee
      * @return \Illuminate\Http\Response
      */
-    public function update($id, Request $req)
+    public function update($id, EmployeeRequest $req)
     {
 
-        $employee = User::find($id);   
-            $employee->fullname     = $req->fullname;
-            $employee->email        = $req->email;
-            $employee->phone        = $req->phone;
-            $employee->address      = $req->address;
-            $employee->facebook     = $req->facebook;
-           if ($req->hasFile('myfile')) {
+        
+
+        $user = User::find($id);   
+            $user->fullname     = $req->fullname;
+            $user->email        = $req->email;
+            $user->phone        = $req->phone;
+            $user->address      = $req->address;
+            $user->facebook     = $req->facebook;
+            if ($req->hasFile('myfile')) {
                 $file = $req->file('myfile');
-                $fileName =  $req->session()->get('username') . '.' .  $file->getClientOriginalExtension();
-                if ($file->move('uploads', $fileName)) {
-                    $employee->profile_img  = $fileName;
-                    $employee->save();
+                $fileName =  $req->session()->get('LoggedUser') . '.' .  $file->getClientOriginalExtension();
+                if ($file->move(public_path('upload'), $fileName)) {
+                    $user->profile_img  = $fileName;
+                    $user->save();
                    
                 } else {
                  
-                    return redirect('/dashboard/profile');
+                    return redirect("employee/dashboard/editprofile/{id}")->with('fail','Profile Information Update Succesfull');
                 }
 
                
             }    
-            $employee->save();
-    return redirect('/employee/dashboard/profile');
+            $user->save();
+    return redirect("employee/dashboard/profile")->with('success','Profile Information Update Succesfull');
     
    
       
+            
             
 
 }
@@ -121,7 +152,9 @@ class EmployeeController extends Controller
         //
     }
     public function profile(Request $req){
-        $employee = User::where('username',$req->session()->get('username'))->first();
-        return view('employee.dashboard.profile.profile')->with('employee',$employee);
+        $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
+        
+        return view('employee.dashboard.profile.profile',$data);
+       
     }
 }

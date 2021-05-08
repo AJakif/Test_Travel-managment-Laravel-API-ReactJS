@@ -1,17 +1,18 @@
 <?php
 
 namespace App\Http\Controllers\employee;
+use App\Models\User;
 use App\Models\Booking;
 use App\Models\Package;
 use App\Models\Customer;
 use App\Models\Tourguide;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Excel;
 use App\Exports\BookingsExport;
-use Brian2694\Toastr\Facades\Toastr;
-use App\Http\Controllers\Controller;
 
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Excel;
+use App\Http\Controllers\Controller;
+use Brian2694\Toastr\Facades\Toastr;
 
 class BookingController extends Controller
 {
@@ -21,8 +22,11 @@ class BookingController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {   $packagelist = Package::paginate(5);
-        return view('employee.dashboard.booking.indexbooking')->with('packagelist',$packagelist);
+
+    
+    { $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
+           $packagelist = Package::where('status','=','active')->paginate(5);
+        return view('employee.dashboard.booking.indexbooking',$data)->with('packagelist',$packagelist);
     }
 
     /**
@@ -31,11 +35,12 @@ class BookingController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create($p_id)
-    {   $customers =  DB::table('customers')->get(); 
+    {   $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
+         $customers =  DB::table('customers')->get(); 
         $package = Package::find($p_id);
         
         
-        return view('employee.dashboard.booking.createbooking')->with('package',$package)->with('customers',$customers);
+        return view('employee.dashboard.booking.createbooking',$data)->with('package',$package)->with('customers',$customers);
     }
 
     /**
@@ -53,11 +58,17 @@ class BookingController extends Controller
         $booking->person = $req->person;
         $booking->username = $req->username;
         $booking->email = $req->email;
-        $booking->status = 0;
+        $booking->bstatus = 0;
         $booking->tour_username = null;
-        $booking->save();
-        return redirect('/dashboard');
-        Toastr::success('New Booking create','Success');
+        ;
+       
+        if($booking->save()){
+            return redirect('/employee/dashboard')->with('success','Booking Confirm Succesfull');
+           
+        }
+        else{
+            return redirect('/employee/dashboard')->with('fail','Booking failed');
+        } 
    ;
     }
  
@@ -66,24 +77,45 @@ class BookingController extends Controller
     $booking = booking::find($b_id);
      
       
-       $booking->status= 1;
-       $booking->status = $req->status;
+       $booking->bstatus= 1;
+       $booking->bstatus = $req->status;
        $booking->save();
-       Toastr::success('Confirm Booking succeessfully','Success');
-       return redirect('/dashboard/viewbooking')->with("Confirm_Booking",'Confirm Booking succeessfully');
+      
+       return redirect('/employee/dashboard/viewbooking');
   
    }
    
+
+
+
    public function tourguide($b_id, Request $req)
    {
+  
+$bookingid = $b_id;
+
+$tour_id = $req->t_id;
+
+$tour = TourGuide::findOrfail($tour_id);
+
+      $tour->booking_id = $bookingid ;
+      $tour->save();
+      
+
+
+      
+   
     $booking = booking::find($b_id);
      
+   
+     $booking->tour_username= $req->t_id;
+     $booking->save();
+
+       
+
+     
       
-       $booking->tour_username= $req->tour_username;
-      
-       $booking->save();
-       Toastr::success('Tour Guide add succeessfully','Success');
-       return redirect('/dashboard/viewbooking');
+    
+       return redirect('/employee/dashboard/viewbooking')->with("success",'TourGuide add succeessfully');
   
    }
 
@@ -93,9 +125,12 @@ class BookingController extends Controller
      * @param  \App\Models\Booking  $booking
      * @return \Illuminate\Http\Response
      */
-    public function show(Booking $booking)
-    {  
 
+
+
+      public function show(Booking $booking)
+    {  
+        $udata = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $tourguides = Tourguide::all();
         $bookinglist =  DB::table('bookings')
         ->join('packages','packages.p_id','=','bookings.pro_id')
@@ -106,13 +141,14 @@ class BookingController extends Controller
     'bookinglist' =>  $bookinglist,
 
     ];
-        return view('employee.dashboard.booking.viewbooking')->with('data',$data)->with('tourguides',$tourguides);
+        return view('employee.dashboard.booking.viewbooking',$udata)->with('data',$data)->with('tourguides',$tourguides);
     }
 
 public function search(Request $req)
-{
+{ $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
     $search = $req->get('search');
     $tourguides = Tourguide::all();
+
     $bookinglist =  DB::table('bookings')->where('username' , 'like' , '%'.$search.'%')
     ->join('packages','packages.p_id','=','bookings.pro_id')
     ->get();
@@ -121,7 +157,7 @@ public function search(Request $req)
    $data =['packages' => $packages,
 'bookinglist' =>  $bookinglist,
 ];
-return view('employee.dashboard.booking.viewbooking')->with('data',$data)->with('tourguides',$tourguides);
+return view('employee.dashboard.booking.viewbooking',$data)->with('data',$data)->with('tourguides',$tourguides);
 }
 
     /**
@@ -135,7 +171,7 @@ return view('employee.dashboard.booking.viewbooking')->with('data',$data)->with(
         //
     }
     public function export(Excel $execl)
-    {   Toastr::success('Excel Downloading','Success');
+    {   
         return $execl->download(new BookingsExport,'bookings.xlsx');
     }
 
@@ -160,7 +196,7 @@ return view('employee.dashboard.booking.viewbooking')->with('data',$data)->with(
     public function destroy($b_id)
     {
         Booking::destroy($b_id);
-        Toastr::error('Booking Deleted','Deleted');
-        return redirect('/dashboard/viewbooking');
+        
+        return redirect('/employee/dashboard/viewbooking')->with("success",'Booking Delete succeessfully');
     }
 }

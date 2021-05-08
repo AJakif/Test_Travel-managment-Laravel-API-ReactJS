@@ -17,7 +17,7 @@ class BlogCommentController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $comments=BlogComment::getAllComments();
-        return response()->json([$data,'comment'=>$comments],200);
+        return view('account.dashboard.comment.index',$data)->with('comments',$comments);
     }
 
     /**
@@ -52,12 +52,10 @@ class BlogCommentController extends Controller
         ];
         //Notification::send($user, new StatusNotification($details));
         if($status){
-            $message = "Thank you for commenting";
-            return response()->json([$status,$message],200);
+            request()->session()->flash('success','Thank you for your comment');
         }
         else{
-            $message = "Error, please try again";
-            return response()->json([$status,$message],200);
+            request()->session()->flash('error','Something went wrong! Please try again!!');
         }
         return redirect()->back();
     }
@@ -79,11 +77,11 @@ class BlogCommentController extends Controller
     {
         $comments=BlogComment::find($id);
         if($comments){
-            return response()->json(['comment'=>$comments],200);
+            return view('account.comment.edit')->with('comment',$comments);
         }
         else{
-            $message = "Comment Not found";
-            return response()->json([$message],200);
+            request()->session()->flash('error','Comment not found');
+            return redirect()->back();
         }
     }
 
@@ -102,17 +100,16 @@ class BlogCommentController extends Controller
             // return $data;
             $status=$comment->fill($data)->update();
             if($status){
-                $message = "Comment Succesfully Updated";
-            return response()->json([$status,$message],200);
+                request()->session()->flash('success','Comment successfully updated');
             }
             else{
-                $message = "Error, please try again";
-            return response()->json([$status,$message],200);
+                request()->session()->flash('error','Something went wrong! Please try again!!');
             }
+            return redirect()->route('account.comment');
         }
         else{
-            $message = "Error, Comment not found";
-            return response()->json([$message],200);
+            request()->session()->flash('error','Comment not found');
+            return redirect()->back();
         }
 
     }
@@ -129,17 +126,16 @@ class BlogCommentController extends Controller
         if($comment){
             $status=$comment->delete();
             if($status){
-                $message = "comment Succesfully Deleted";
-            return response()->json([$status,$message],200);
+                request()->session()->flash('success','Blog Comment successfully deleted');
             }
             else{
-                $message = "Error please try again";
-            return response()->json([$status,$message],200);
+                request()->session()->flash('error','Error occurred please try again');
             }
+            return back();
         }
         else{
-            $message = "Error, Comment not found";
-            return response()->json([$message],200);
+            request()->session()->flash('error','Blog Comment not found');
+            return redirect()->back();
         }
     }
 }

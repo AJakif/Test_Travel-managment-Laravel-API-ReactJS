@@ -9,6 +9,5 @@ class Booking extends Model
 {
     use HasFactory;
     protected $primaryKey = "b_id";
-
  
 }

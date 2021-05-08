@@ -14,7 +14,7 @@ class BlogCategoryController extends Controller
     {
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
         $blogCategory=BlogCategory::orderBy('id','DESC')->paginate(10);
-        return response()->json([$data,'bloogcatagories'=>$blogCategory],200);
+        return view('account.dashboard.blogcategory.index',$data)->with('blogCategories',$blogCategory);
     }
 
     /**
@@ -25,7 +25,7 @@ class BlogCategoryController extends Controller
     public function create()
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
-        return response()->json([$data],200);
+        return view('account.dashboard.blogcategory.create',$data);
     }
 
     /**
@@ -50,13 +50,12 @@ class BlogCategoryController extends Controller
         $data['slug']=$slug;
         $status=BlogCategory::create($data);
         if($status){
-            $message = "Blog Caatagory Succesfully Added";
-            return response()->json([$status,$message],200);
+            request()->session()->flash('success','Blog Category Successfully added');
         }
         else{
-            $message = "Error please try again";
-            return response()->json([$status,$message],200);
+            request()->session()->flash('error','Please try again!!');
         }
+        return redirect()->route('account.blog.cat');
     }
 
     /**
@@ -80,7 +79,7 @@ class BlogCategoryController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $blogCategory=BlogCategory::findOrFail($id);
-        return response()->json([$data,'blogcatagories'=>$blogCategory],200);
+        return view('account.dashboard.blogcategory.edit',$data)->with('blogCategory',$blogCategory);
     }
 
     /**
@@ -101,13 +100,12 @@ class BlogCategoryController extends Controller
         $data=$request->all();
         $status=$blogCategory->fill($data)->save();
         if($status){
-            $message = "Blog Catagory Succesfully Updated";
-            return response()->json([$status,$message],200);
+            request()->session()->flash('success','Blog Category Successfully updated');
         }
         else{
-            $message = "Error please try again";
-            return response()->json([$status,$message],200);
+            request()->session()->flash('error','Please try again!!');
         }
+        return redirect()->route('account.blog.cat');
     }
 
     /**
@@ -123,12 +121,11 @@ class BlogCategoryController extends Controller
         $status=$blogCategory->delete();
         
         if($status){
-            $message = "Blog Catagory Succesfully Deleted";
-            return response()->json([$status,$message],200);
+            request()->session()->flash('success','Blog Category successfully deleted');
         }
         else{
-            $message = "Error please try again";
-            return response()->json([$status,$message],200);
+            request()->session()->flash('error','Error while deleting blog category');
         }
+        return redirect()->route('account.blog.cat');
     }
 }

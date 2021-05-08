@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers\employee;
 
-use App\Imports\CustomersExport;
-use App\Models\Employee;
+use App\Models\User;
 use App\Models\Customer;
+use App\Models\Employee;
 use Illuminate\Http\Request;
+use App\Imports\CustomersExport;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Controller;
+use Brian2694\Toastr\Facades\Toastr;
+use Illuminate\Support\Facades\Hash;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Http\Requests\CustomerRequest;
 
 class CustomerController extends Controller
 {
@@ -30,7 +34,7 @@ class CustomerController extends Controller
         $customer->status = $req->status;
         $customer->save();
      
-        return redirect('/dashboard/view')->with("Confirm_status",'Confirm status succeessfully');
+        return redirect('/employee/dashboard/view')->with("success",'Confirm status succeessfully');
    
     }
     /**
@@ -40,8 +44,8 @@ class CustomerController extends Controller
      */
     public function create(Request $req)
     {
-        
-        return view('employee.dashboard.customer.adduser');
+        $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
+        return view('employee.dashboard.customer.adduser',$data);
     }
 
     /**
@@ -52,18 +56,28 @@ class CustomerController extends Controller
      */
     public function store(Request $req)
     {
-        $customer = new Customer();
-        $customer->fullname = $req->fullname;
-        $customer->username = $req->username;
-        $customer->email = $req->email;
-        $customer->address = $req->address;
-        $customer->phone = $req->phone;
-        $customer->password = $req->password;
-        $customer->gender = $req->gender;
+       $customer = new Customer();
+        $customer->fullname = $req->input('fullname');
+        $customer->username = $req->input('username');
+        $customer->email = $req->input('email');
+        $customer->address = $req->input('address');
+        $customer->phone = $req->input('phone');
+        $customer->password = Hash::make($req->input('password'));
+        $customer->gender = $req->input('gender');
         $customer->save();
 
-        return redirect('/dashboard');
+      /*   Toastr::success('ADDED', 'Success');
+        Toastr::failed('failed', 'failed'); */
+    /*   
+     if($customer->save()){
+            return redirect('/employee/dashboard')->with('success','Profile Information Update Succesfull');
+           
+        }
+        else{
+            return redirect('/employee/dashboard')->with('fail','Profile Information Update failed');
+        }  */
 
+        return $customer;
     }
  
 
@@ -74,17 +88,17 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Request $req)
-    {
+    { $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $customerlist = Customer::paginate(5);
-        return view('employee.dashboard.customer.viewuser')->with('customerlist',$customerlist);
+        return view('employee.dashboard.customer.viewuser',$data)->with('customerlist',$customerlist);
     }
 
 
     public function search(Request $req)
-    {
+    { $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $search = $req->get('search');
         $customerlist = DB::table('customers')->where('username' , 'like' , '%'.$search.'%')->paginate(5);
-        return view('employee.dashboard.customer.viewuser')->with('customerlist',$customerlist);
+        return view('employee.dashboard.customer.viewuser',$data)->with('customerlist',$customerlist);
     }
     /**
      * Show the form for editing the specified resource.
@@ -93,15 +107,15 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
-    {
+    { $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $customer = Customer::find($id);
-        return view('employee.dashboard.customer.edituser')->with('customer',$customer);
+        return view('employee.dashboard.customer.edituser',$data)->with('customer',$customer);
     }
     public function import(Request $req)
     {
         $file = $req->file('file')->store('import');
         Excel::import(new CustomersExport, $file);
-        return back()->withStatus('Excel File import successfully');
+        return back()->withStatus('Excel File import successfully')->with('success','Excel File import successfully');;
     }
     /**
      * Update the specified resource in storage.
@@ -112,6 +126,7 @@ class CustomerController extends Controller
      */
     public function update(Request $req, $id)
     {
+      
         $customer = Customer::find($id);
         $customer->fullname = $req->fullname;
         $customer->email = $req->email;
@@ -119,9 +134,13 @@ class CustomerController extends Controller
         $customer->phone = $req->phone;
         $customer->password = $req->password;
         $customer->gender = $req->gender;
-        $customer->save();
-
-        return redirect('/dashboard/view');
+        
+        if($customer->save()){
+            return redirect('/employee/dashboard/view')->with('success','Customer Information Update Succesfull');
+           
+        }
+      
+        
     }
 
     /**
@@ -133,7 +152,10 @@ class CustomerController extends Controller
     public function destroy($id)
     {
         if(Customer::destroy($id)){
-            return redirect('/dashboard/view');
-        } 
+            return redirect('/employee/dashboard/view')->with('success','Customer Information Detele Succesfull');
+           
+        }
+      
+       
     }
 }

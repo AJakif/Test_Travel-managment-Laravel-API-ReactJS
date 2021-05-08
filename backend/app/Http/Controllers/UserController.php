@@ -55,12 +55,10 @@ class UserController extends Controller
                  $save = $user->save();
 
                  if($save){
-                    $message = "Registration Successfull";
-                    return response()->json([$message,$save],200);
+                    return redirect('/login')->with('success','Registration Succesfull');
 
                  }else{
-                    $message = "Error Try again";
-                    return response()->json([$message,$save],200);
+                     return back()->with('fail','Something went wrong, try again later');
                  }
     }
     

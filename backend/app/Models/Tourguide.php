@@ -9,4 +9,5 @@ class Tourguide extends Model
 {
     use HasFactory;
     protected $primaryKey = "t_id";
+    protected $table = "tourguides";
 }

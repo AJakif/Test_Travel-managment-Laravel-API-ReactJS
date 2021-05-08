@@ -17,7 +17,7 @@ class Employee
     public function handle(Request $request, Closure $next)
     {
         if( session('Loggedtype') == 'employee')
-    {
+    {  
         return $next($request);
     }
     else{

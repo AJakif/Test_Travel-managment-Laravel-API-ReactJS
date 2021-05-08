@@ -19,7 +19,7 @@ class EmpController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $data['alldata'] = User::where('type','=' ,'employee')->orwhere('type','=' ,'guide')->get();
-        return response()->json([$data],200);
+        return view('account.dashboard.employee.index',$data);
     }
 
     /**
@@ -31,7 +31,7 @@ class EmpController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         
-        return response()->json([$data],200);
+        return view('account.dashboard.employee.create',$data);
     }
 
     /**
@@ -51,7 +51,6 @@ class EmpController extends Controller
              //    $user->company = $request->company;
                 $user->phone = $request->phone;
                 $user->gender = $request->gender;
-                $user->bloodgroup = $request->bloodgroup;
                 // $user->city = $request->city;
                 $user->salary = $request->salary;
                 $user->type = $request->type;
@@ -59,9 +58,9 @@ class EmpController extends Controller
                 if($request -> file('image')){
                     $file = $request -> file('image');
                     $data = $user->username;
-                    $filename = $data.".".$file->getClientOriginalExtension();
+                    $filename = $data.$file->getClientOriginalExtension();
                     $file->move(public_path('upload/user_image'), $filename);
-                    $user['profile_img']= $filename;
+                    $user['profil_img']= $filename;
                 }
                 $user->save();
 
@@ -73,8 +72,7 @@ class EmpController extends Controller
                 $employee_salary->increment_salary = '0';
                 $employee_salary->save();
 
-                $message = "Employee regestered succesfully";
-                return response()->json(['User'=>$user,'salary'=>$employee_salary,$message],200);
+            return redirect()->route('account.employee')->with('success','Employee regestered Succesfully');
 
     }
 
@@ -99,7 +97,7 @@ class EmpController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
        $data['user'] = User::find($id);
-       return response()->json([$data],200);
+       return view('account.dashboard.employee.edit',$data);
     }
 
     /**
@@ -124,15 +122,14 @@ class EmpController extends Controller
             $file = $request -> file('image');
             @unlink(public_path('upload/user_image'.$user->profile_img));
             $data = $user->username;
-            $filename = $data.".".$file->getClientOriginalExtension();
+            $filename = $data.$file->getClientOriginalExtension();
             $file->move(public_path('upload/user_image'), $filename);
-            $user['profile_img']= $filename;
+            $user['profil_img']= $filename;
         }
         $user->save();
 
 
-        $message = "Employee Information Updated succesfully";
-                return response()->json(['User'=>$user,$message],200);
+        return redirect()->route('account.employee')->with('success','Employee Information Updated Succesfully');
     }
 
     /**
@@ -143,22 +140,6 @@ class EmpController extends Controller
      */
     public function destroy($id)
     {
-        $user=user::find($id);
-        if($user){
-            $status=$user->delete();
-            if($status){
-                $message = "Employee Deleted succesfully";
-                return response()->json([$status,$message],200);
-            }
-            else{
-                $message = "Error please try again";
-                return response()->json([$status,$message],200);
-            }
-            
-        }
-        else{
-            $message = "Employee not found";
-                return response()->json([$message],200);
-        }
+        //
     }
 }

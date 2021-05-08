@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers\employee;
 
+use App\Models\User;
 use App\Models\feedback;
 use Illuminate\Http\Request;
+use App\Models\feedbackcatagory;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\FeedbackRequest;
 
 class FeedbackController extends Controller
 {
@@ -14,8 +18,9 @@ class FeedbackController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        return view('employee.dashboard.feedback.viewfeedback');
+    {$data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
+        $feedbacklist =  feedback::all();
+        return view('employee.dashboard.feedback.viewfeedback',$data,compact('feedbacklist'));
     }
 
     /**
@@ -25,7 +30,9 @@ class FeedbackController extends Controller
      */
     public function create()
     {
-        //
+        $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
+        $feedbackcatagorys =  feedbackcatagory::all();
+        return view('employee.dashboard.feedback.createfeedback',$data,compact('feedbackcatagorys'));
     }
 
     /**
@@ -34,9 +41,15 @@ class FeedbackController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(FeedbackRequest $req)
     {
-        //
+        $feedback = new feedback();
+        $feedback->name = $req->name;
+        $feedback->email = $req->email;
+        $feedback->message = $req->message;
+        $feedback->feed_cat_id = $req->service;
+        $feedback->save();
+        return redirect('/employee/dashboard')->with("success",'Create succeessfully');
     }
 
     /**
@@ -79,8 +92,10 @@ class FeedbackController extends Controller
      * @param  \App\Models\feedback  $feedback
      * @return \Illuminate\Http\Response
      */
-    public function destroy(feedback $feedback)
+    public function delete($f_id)
     {
-        //
+        if(feedback::destroy($f_id)){
+            return redirect('/employee/dashboard/viewfeedback')->with("fail",'Delete succeessfully');
+        } 
     }
 }

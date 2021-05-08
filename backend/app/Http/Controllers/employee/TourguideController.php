@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers\employee;
 
+use App\Models\User;
 use App\Models\Tourguide;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\TourguideRequest;
 
 class TourguideController extends Controller
 {
@@ -24,8 +28,8 @@ class TourguideController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create()
-    {
-        return view('employee.dashboard.tourguide.addtourguide');
+    { $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
+        return view('employee.dashboard.tourguide.addtourguide',$data);
     }
 
     /**
@@ -34,17 +38,17 @@ class TourguideController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $req)
+    public function store(TourguideRequest $req)
     {
         $tourguide = new Tourguide();
         $tourguide->fullname = $req->fullname;
         $tourguide->username = $req->username;
         $tourguide->email = $req->email;
         $tourguide->phone = $req->phone;
-        $tourguide->password = $req->password;
+        $tourguide->password = Hash::make($req->password);
         $tourguide->save();
 
-        return redirect('/dashboard');
+        return redirect('/employee/dashboard/viewtourguide')->with("success",'Create succeessfully');
     }
 
     /**
@@ -54,9 +58,9 @@ class TourguideController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Tourguide $tourguide)
-    {
+    { $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $tourguidelist = Tourguide::paginate(5);
-        return view('employee.dashboard.tourguide.viewtourguide')->with('tourguidelist',$tourguidelist);
+        return view('employee.dashboard.tourguide.viewtourguide',$data)->with('tourguidelist',$tourguidelist);
     }
 
     /**
@@ -65,9 +69,10 @@ class TourguideController extends Controller
      * @param  \App\Models\Tourguide  $tourguide
      * @return \Illuminate\Http\Response
      */
-    public function edit(Tourguide $tourguide)
-    {
-        //
+    public function edit($id)
+    { $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
+        $tourguide = Tourguide::find($id);
+        return view('employee.dashboard.tourguide.edittourguide',$data)->with('tourguide',$tourguide);
     }
 
     /**
@@ -77,9 +82,16 @@ class TourguideController extends Controller
      * @param  \App\Models\Tourguide  $tourguide
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Tourguide $tourguide)
+    public function update(Request $req, $id)
     {
-        //
+        $tourguide = Tourguide::find($id);
+        $tourguide->fullname = $req->fullname;
+        $tourguide->email = $req->email;
+        $tourguide->phone = $req->phone;
+        $tourguide->username = $req->username;
+        $tourguide->save();
+
+        return redirect('/employee/dashboard/viewtourguide')->with("success",'Update succeessfully');
     }
 
     /**
@@ -88,8 +100,17 @@ class TourguideController extends Controller
      * @param  \App\Models\Tourguide  $tourguide
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Tourguide $tourguide)
+    public function destroy($id)
     {
-        //
+        if(Tourguide::destroy($id)){
+            return redirect('/employee/dashboard/viewtourguide')->with("fail",'Delete succeessfully');
+        } 
+    }
+    
+    public function search(Request $req)
+    { $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
+        $search = $req->get('search');
+        $tourguidelist = DB::table('tourguides')->where('username' , 'like' , '%'.$search.'%')->paginate(5);
+        return view('employee.dashboard.tourguide.viewtourguide',$data)->with('tourguidelist',$tourguidelist);
     }
 }

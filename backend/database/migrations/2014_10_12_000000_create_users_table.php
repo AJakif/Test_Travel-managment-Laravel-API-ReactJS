@@ -33,6 +33,7 @@ class CreateUsersTable extends Migration
             $table->string('type');
             $table->string('salary')->nullable();
             $table->date('join_date')->nullable();
+            $table->string('provider_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

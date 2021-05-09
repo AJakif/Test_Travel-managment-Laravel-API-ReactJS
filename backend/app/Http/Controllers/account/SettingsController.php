@@ -12,7 +12,7 @@ class SettingsController extends Controller
     public function settings(){
         $user = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
         $data=Settings::first();
-        return view('account.dashboard.settings',$user)->with('data',$data);
+        return response()->json([$user,$data],200);
     }
 
     public function settingsUpdate(Request $request){
@@ -30,13 +30,36 @@ class SettingsController extends Controller
         // return $data;
         $settings=Settings::first();
         // return $settings;
+        if ($request->hasFile('photo')) {
+            $file = $request->file('photo');
+            $fileName =  $settings->id . '.' .  $file->getClientOriginalExtension();
+            //$request->photo->move(public_path('/upload/blog_image'), $fileName);
+           if ($file->move(public_path('/upload/webphoto'), $fileName)) {
+                $data['photo']= $fileName;
+                $status=$settings->fill($data)->save();
+               
+            } 
+           
+        }
+        if ($request->hasFile('logo')) {
+            $file = $request->file('logo');
+            $fileName =  $settings->id . '.' .  $file->getClientOriginalExtension();
+            //$request->photo->move(public_path('/upload/blog_image'), $fileName);
+           if ($file->move(public_path('/upload/weblogo'), $fileName)) {
+                $data['logo']= $fileName;
+                $status=$settings->fill($data)->save();
+               
+            } 
+           
+        }
         $status=$settings->fill($data)->save();
         if($status){
-            request()->session()->flash('success','Setting successfully updated');
+            $message = "Settings Succesfully Updated";
+            return response()->json([$status,$message],200);
         }
         else{
-            request()->session()->flash('error','Please try again');
+            $message = "Error Please try again";
+            return response()->json([$status,$message],200);
         }
-        return redirect()->route('account.dashboard');
     }
 }

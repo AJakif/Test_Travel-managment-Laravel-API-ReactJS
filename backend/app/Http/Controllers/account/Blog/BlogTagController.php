@@ -14,7 +14,7 @@ class BlogTagController extends Controller
     {
         $data = ['LoggedUserInfo'=>User::where('id','=', session('LoggedUser'))->first()];
         $blogTag=BlogTag::orderBy('id','DESC')->paginate(10);
-        return view('account.dashboard.blogtag.index',$data)->with('blogTags',$blogTag);
+        return response()->json([$data,'blogtags'=>$blogTag],200);
     }
 
     /**
@@ -25,7 +25,7 @@ class BlogTagController extends Controller
     public function create()
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
-        return view('account.dashboard.blogtag.create',$data);
+        return response()->json([$data],200);
     }
 
     /**
@@ -49,12 +49,13 @@ class BlogTagController extends Controller
         $data['slug']=$slug;
         $status=BlogTag::create($data);
         if($status){
-            request()->session()->flash('success','Blog Tag Successfully added');
+            $message = "Blog Tag Succesfully created";
+            return response()->json([$status,$message],200);
         }
         else{
-            request()->session()->flash('error','Please try again!!');
+            $message = "Error please try again";
+            return response()->json([$status,$message],200);
         }
-        return redirect()->route('account.blog.tag');
     }
 
     /**
@@ -78,7 +79,7 @@ class BlogTagController extends Controller
     {
         $data = ['LoggedUserInfo'=>user::where('id','=', session('LoggedUser'))->first()];
         $blogTag=BlogTag::findOrFail($id);
-        return view('account.dashboard.blogtag.edit',$data)->with('blogTag',$blogTag);
+        return response()->json([$data,'blogtags'=>$blogTag],200);
     }
 
     /**
@@ -99,12 +100,13 @@ class BlogTagController extends Controller
         $data=$request->all();
         $status=$blogTag->fill($data)->save();
         if($status){
-            request()->session()->flash('success','Blog Tag Successfully updated');
+            $message = "Blog Tag Succesfully Updated";
+            return response()->json([$status,$message],200);
         }
         else{
-            request()->session()->flash('error','Please try again!!');
+            $message = "Error please try again";
+            return response()->json([$status,$message],200);
         }
-        return redirect()->route('account.blog.tag');
     }
 
     /**
@@ -120,11 +122,12 @@ class BlogTagController extends Controller
         $status=$blogTag->delete();
         
         if($status){
-            request()->session()->flash('success','Blog Tag successfully deleted');
+            $message = "Blog Tag Succesfully deleted";
+            return response()->json([$status,$message],200);
         }
         else{
-            request()->session()->flash('error','Error while deleting blog tag');
+            $message = "Error please try again";
+            return response()->json([$status,$message],200);
         }
-        return redirect()->route('account.blog.tag');
     }
 }
